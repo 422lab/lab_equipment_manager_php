@@ -1,2 +1,2 @@
-PHP Backend Server for Laboratory Power Manager
-===============================================
+PHP Backend Server for Lab Equipment Manager
+============================================

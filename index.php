@@ -6,9 +6,9 @@
  * @category None
  * @package  None
  * @author   Jack Chen <redchenjs@live.com>
- * @license  https://server.zyiot.top/lpm public
+ * @license  https://server.zyiot.top/lem public
  * @version  GIT: <v0.1-draft>
- * @link     https://server.zyiot.top/lpm
+ * @link     https://server.zyiot.top/lem
  */
 
 $data = file_get_contents("php://input");   // 获取POST数据
