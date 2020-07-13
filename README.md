@@ -1,2 +1,2 @@
-PHP Backend Server for NFC Attendance System
-============================================
+PHP Backend Server for Laboratory Power Manager
+===============================================
