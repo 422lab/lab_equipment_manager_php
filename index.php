@@ -11,12 +11,16 @@
  * @link     https://server.zyiot.top/lem
  */
 
+const HTTP_REQ_CODE_UPD = 100;  // 设备端同步请求
+const HTTP_REQ_CODE_OFF = 101;  // 设备端下机通知
+const HTTP_REQ_CODE_ON  = 102;  // 设备端上机请求
+
 $data = file_get_contents("php://input");   // 获取POST数据
 $data = json_decode($data, true);           // 解析JSON
 $code = $data['code'];                      // 接收$code请求号;Number;3位数字;
 
 switch ($code) {
-case 100:   // 设备端同步请求
+case HTTP_REQ_CODE_UPD:
     $status   = $data['status'];            // 接收$status设备状态;String;"on":已上机,"off":未上机;
     $wifi_mac = $data['wifi_mac'];          // 接收$wifi_mac设备MAC地址;String;"30:ae:a4:56:75:50";
     $arr = array(
@@ -29,7 +33,7 @@ case 100:   // 设备端同步请求
     header('content-type:application/json');
     echo json_encode($arr);
     break;
-case 101:   // 设备端下机通知
+case HTTP_REQ_CODE_OFF:
     $status   = $data['status'];            // 接收$status设备状态;String;"on":已上机,"off":未上机;
     $wifi_mac = $data['wifi_mac'];          // 接收$wifi_mac设备MAC地址;String;"30:ae:a4:56:75:50";
     $arr = array(
@@ -38,7 +42,7 @@ case 101:   // 设备端下机通知
     header('content-type:application/json');
     echo json_encode($arr);
     break;
-case 102:   // 设备端上机请求
+case HTTP_REQ_CODE_ON:
     $status   = $data['status'];            // 接收$status设备状态;String;"on":已上机,"off":未上机;
     $wifi_mac = $data['wifi_mac'];          // 接收$wifi_mac设备MAC地址;String;"30:ae:a4:56:75:50";
     $arr = array(
@@ -50,7 +54,7 @@ case 102:   // 设备端上机请求
     header('content-type:application/json');
     echo json_encode($arr);
     break;
-default:    // 其他请求
+default:
     break;
 }
 ?>
