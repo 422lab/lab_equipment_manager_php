@@ -7,7 +7,7 @@
  * @package  None
  * @author   Jack Chen <redchenjs@live.com>
  * @license  https://server.zyiot.top/lem public
- * @version  GIT: <v0.2-draft>
+ * @version  GIT: <v0.3-draft>
  * @link     https://server.zyiot.top/lem
  */
 
@@ -25,7 +25,7 @@ case HTTP_REQ_CODE_DEV_UPD:
     $relay_status = $data['relay_status'];  // 获取$relay_status设备继电器状态;String;"on":已开启,"off":未开启;
     $arr = array(
         'code'        => $code,             // 返回$code请求号;Number;将接收到的请求号原样送回;
-        'status'      => true,              // 返回$status请求结果;Bool;未上机时,true:更新二维码数据,false:保持二维码数据;已上机时,true:保持上机,false:强制下机;
+        'status'      => true,              // 返回$status状态数据;Bool;未上机时,true:更新二维码数据,false:保持二维码数据;已上机时,true:保持上机,false:强制下机;
         'qrcode'      => md5(time()),       // 返回$qrcode二维码数据;String;32位MD5字符串,未上机且有更新时发送;
         'user_info'   => 'Xb14610214',      // 返回$user_info用户信息;String;10位字符串(学工号),已上机且有更新时发送;
         'expire_time' => '20:00:00'         // 返回$expire_time预约到期时间;String;"HH:MM:SS",24小时制,已上机且有更新时发送;
@@ -47,7 +47,7 @@ case HTTP_REQ_CODE_DEV_ON:
     $relay_status = $data['relay_status'];  // 获取$relay_status设备继电器状态;String;"on":已开启,"off":未开启;
     $arr = array(
         'code'        => $code,             // 返回$code请求号;Number;将接收到的请求号原样送回;
-        'status'      => true,              // 返回$status请求结果;Bool;true:允许上机,false:不允许上机;
+        'result'      => true,              // 返回$result请求结果;Bool;true:允许上机,false:不允许上机;
         'user_info'   => 'Xb14610214',      // 返回$user_info用户信息;String;10位字符串(学工号),允许上机时发送;
         'expire_time' => '20:00:00'         // 返回$expire_time预约到期时间;String;"HH:MM:SS",24小时制,允许上机时发送;
     );
