@@ -11,16 +11,27 @@
  * @link     https://server.zyiot.top/lem
  */
 
-const HTTP_REQ_CODE_DEV_UPD = 100;  // 设备端请求获取更新
-const HTTP_REQ_CODE_DEV_OFF = 101;  // 设备端发送下机通知
-const HTTP_REQ_CODE_DEV_ON  = 102;  // 设备端请求允许上机
+require "utils.php";
+
+const HTTP_REQ_CODE_DEV_GET_INFO    = 100; // 设备端获取用户信息
+const HTTP_REQ_CODE_DEV_SET_ONLINE  = 101; // 设备端请求允许上机
+const HTTP_REQ_CODE_DEV_SET_OFFLINE = 102; // 设备端发送下机通知
+
+const HTTP_REQ_CODE_APP_GET_INFO    = 110; // 微信端获取用户信息
+const HTTP_REQ_CODE_APP_SET_TIME    = 111; // 微信端设定预约时间
+const HTTP_REQ_CODE_APP_SET_CANCEL  = 112; // 微信端取消预约时间
+const HTTP_REQ_CODE_APP_SET_ONLINE  = 113; // 微信端请求允许上机
+const HTTP_REQ_CODE_APP_SET_OFFLINE = 114; // 微信端请求强制下机
+const HTTP_REQ_CODE_APP_BIND_USER   = 115; // 微信端请求绑定用户
+const HTTP_REQ_CODE_APP_UNBIND_USER = 116; // 微信端请求解绑用户
+const HTTP_REQ_CODE_APP_UPDATE_PSWD = 117; // 微信端请求修改密码
 
 $data = file_get_contents("php://input");   // 获取POST数据
 $data = json_decode($data, true);           // 解析JSON
 $code = $data['request'];                   // 客户端请求码
 
 switch ($code) {
-case HTTP_REQ_CODE_DEV_UPD:
+case HTTP_REQ_CODE_DEV_GET_INFO:
     $device_mac   = $data['device_mac'];    // 获取$device_mac设备MAC地址;String;"30:ae:a4:56:75:50";
     $relay_status = $data['relay_status'];  // 获取$relay_status设备继电器状态;String;"on":已开启,"off":未开启;
     $arr = array(
@@ -33,16 +44,7 @@ case HTTP_REQ_CODE_DEV_UPD:
     header('content-type:application/json');
     echo json_encode($arr);
     break;
-case HTTP_REQ_CODE_DEV_OFF:
-    $device_mac   = $data['device_mac'];    // 获取$device_mac设备MAC地址;String;"30:ae:a4:56:75:50";
-    $relay_status = $data['relay_status'];  // 获取$relay_status设备继电器状态;String;"on":已开启,"off":未开启;
-    $arr = array(
-        'code' => $code                     // 返回$code请求号;Number;将接收到的请求号原样送回;
-    );
-    header('content-type:application/json');
-    echo json_encode($arr);
-    break;
-case HTTP_REQ_CODE_DEV_ON:
+case HTTP_REQ_CODE_DEV_SET_ONLINE:
     $device_mac   = $data['device_mac'];    // 获取$device_mac设备MAC地址;String;"30:ae:a4:56:75:50";
     $relay_status = $data['relay_status'];  // 获取$relay_status设备继电器状态;String;"on":已开启,"off":未开启;
     $arr = array(
@@ -54,7 +56,95 @@ case HTTP_REQ_CODE_DEV_ON:
     header('content-type:application/json');
     echo json_encode($arr);
     break;
+case HTTP_REQ_CODE_DEV_SET_OFFLINE:
+    $device_mac   = $data['device_mac'];    // 获取$device_mac设备MAC地址;String;"30:ae:a4:56:75:50";
+    $relay_status = $data['relay_status'];  // 获取$relay_status设备继电器状态;String;"on":已开启,"off":未开启;
+    $arr = array(
+        'code' => $code                     // 返回$code请求号;Number;将接收到的请求号原样送回;
+    );
+    header('content-type:application/json');
+    echo json_encode($arr);
+    break;
+case HTTP_REQ_CODE_APP_GET_INFO:
+    $wx_code = $data['wx_code'];
+    if (($wx_openid = getOpenID($wx_code)) !== null) {
+        if (($user_id = getUserID($wx_openid)) !== null) {
+            $last_info = getLastInfo($user_id);
+            $arr = array(
+                'result' => true,
+                'user_id' => $user_id,
+                'last_time' => $last_info['last_time'],
+                'last_location' => $last_info['last_location']
+            );
+        } else {
+            $arr = array(
+                'result' => false
+            );
+        }
+    } else {
+        $arr = array(
+            'result' => null
+        );
+    }
+    header('content-type:application/json');
+    echo json_encode($arr);
+    break;
+case HTTP_REQ_CODE_APP_BIND_USER:
+    $wx_code = $data['wx_code'];
+    $user_id = $data['user_id'];
+    $user_passwd = $data['user_passwd'];
+    if (($wx_openid = getOpenID($wx_code)) !== null) {
+        $errmsg = bindUser($wx_openid, $user_id, $user_passwd);
+        $arr = array(
+            'result' => $errmsg === null ? true : false,
+            'errmsg' => $errmsg
+        );
+    } else {
+        $arr = array(
+            'result' => null
+        );
+    }
+    header('content-type:application/json');
+    echo json_encode($arr);
+    break;
+case HTTP_REQ_CODE_APP_UNBIND_USER:
+    $wx_code = $data['wx_code'];
+    $user_id = $data['user_id'];
+    if (($wx_openid = getOpenID($wx_code)) !== null) {
+        $errmsg = unbindUser($wx_openid, $user_id);
+        $arr = array(
+            'result' => $errmsg === null ? true : false,
+            'errmsg' => $errmsg
+        );
+    } else {
+        $arr = array(
+            'result' => null
+        );
+    }
+    header('content-type:application/json');
+    echo json_encode($arr);
+    break;
+case HTTP_REQ_CODE_APP_UPDATE_PSWD:
+    $wx_code = $data['wx_code'];
+    $user_id = $data['user_id'];
+    $old_passwd = $data['old_passwd'];
+    $new_passwd = $data['new_passwd'];
+    if (($wx_openid = getOpenID($wx_code)) !== null) {
+        $errmsg = updatePassword($wx_openid, $user_id, $old_passwd, $new_passwd);
+        $arr = array(
+            'result' => $errmsg === null ? true : false,
+            'errmsg' => $errmsg
+        );
+    } else {
+        $arr = array(
+            'result' => null
+        );
+    }
+    header('content-type:application/json');
+    echo json_encode($arr);
+    break;
 default:
+    listLog();
     break;
 }
 ?>
