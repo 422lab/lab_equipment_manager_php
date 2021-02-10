@@ -37,12 +37,12 @@ case HTTP_REQ_CODE_APP_GET_INFO:
     $wx_code = $data['wx_code'];
     if (($wx_openid = getOpenID($wx_code)) !== null) {
         if (($user_id = getUserID($wx_openid)) !== null) {
-            $last_info = getLastInfo($user_id);
+            $resv_info = getResvInfo($user_id);
             $arr = array(
                 'result' => true,
                 'user_id' => $user_id,
-                'last_time' => $last_info['last_time'],
-                'last_location' => $last_info['last_location']
+                'resv_loc' => $resv_info['resv_loc'],
+                'resv_time' => $resv_info['resv_time']
             );
         } else {
             $arr = array(

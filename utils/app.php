@@ -142,13 +142,13 @@ function getUserID($wx_openid)
 }
 
 /**
- * 使用$user_id查找并返回$last_info
+ * 使用$user_id查找并返回$resv_info
  *
  * @param string $user_id User ID
  *
- * @return array $last_info Last Login Info
+ * @return array $resv_info Reservation Info
  */
-function getLastInfo($user_id)
+function getResvInfo($user_id)
 {
     $conn = mysqli_connect(DB_HOST, DB_USER, DB_PASS);
     if (!$conn) {
@@ -157,67 +157,34 @@ function getLastInfo($user_id)
     mysqli_select_db($conn, DB_NAME);
     mysqli_set_charset($conn, 'utf8');
 
-    // 使用$user_id查找$device_location和$create_time
-    $sql = "SELECT `location`, `create_time` FROM `log_tbl`
-            WHERE BINARY `user`='$user_id' AND `comment`='签到'
-            ORDER BY `create_time` DESC LIMIT 0,1";
+    // 使用$user_id查找$resv_loc和$resv_time
+    $sql = "SELECT `resv_loc` `resv_time` FROM `token_tbl`
+            WHERE BINARY `user_id`='$user_id'";
     $retval = mysqli_query($conn, $sql);
     if (!$retval) {
         die('Query failed.');
     }
     // 整理查询结果
-    if (($row = mysqli_fetch_array($retval, MYSQLI_ASSOC)) !== null) {
+    if (($row = mysqli_fetch_array($retval, MYSQLI_ASSOC)) !== null &&
+         $row['resv_loc'] !== '' && $row['resv_time'] !== '') {
         // 记录存在
-        $last_info = array(
-            'last_time' => $row['create_time'],
-            'last_location' => $row['location']
+        $resv_info = array(
+            'resv_loc' => $row['resv_loc'],
+            'resv_time' => $row['resv_time']
         );
     } else {
         // 记录不存在
-        $last_info = array(
-            'last_time' => '无',
-            'last_location' => '无'
+        $resv_info = array(
+            'resv_loc' => '无',
+            'resv_time' => '无'
         );
     }
     // 返回结果
-    return $last_info;
+    return $resv_info;
 }
 
 /**
- * 使用$wx_openid获取$user_token
- *
- * @param string $wx_openid WeChat OpenID
- *
- * @return string $user_token User Token
- */
-function getUserToken($wx_openid)
-{
-    $conn = mysqli_connect(DB_HOST, DB_USER, DB_PASS);
-    if (!$conn) {
-        die('Access denied.');
-    }
-    mysqli_select_db($conn, DB_NAME);
-    mysqli_set_charset($conn, 'utf8');
-
-    // 使用$wx_openid查找$user_token
-    $sql = "SELECT `user_token` FROM `token_tbl`
-            WHERE BINARY `wx_openid`='$wx_openid'";
-    $retval = mysqli_query($conn, $sql);
-    if (!$retval) {
-        die('Query failed.');
-    }
-    // 整理查询结果
-    if (($row = mysqli_fetch_array($retval, MYSQLI_ASSOC)) !== null) {
-        // 记录存在
-        return $row['user_token'];
-    } else {
-        // 记录不存在
-        return null;
-    }
-}
-
-/**
- * 使用$user_id查找并校验$user_passwd，绑定$wx_openid与$user_id，生成$user_token，将记入日志
+ * 使用$user_id查找并校验$user_passwd，绑定$wx_openid与$user_id，将记入日志
  *
  * @param string $wx_openid   WeChat Open ID
  * @param string $user_id     User ID
@@ -254,12 +221,8 @@ function bindUser($wx_openid, $user_id, $user_passwd)
             }
             // 整理查询结果
             if ($user_id === TEST_USER || mysqli_fetch_array($retval, MYSQLI_ASSOC) === null) {
-                // $user_id未被绑定，生成$user_token
-                $user_token = md5(
-                    $wx_openid.$user_id.$user_passwd.date('Y-m-d H:i:s')
-                );
-                // 更新$wx_openid对应的$user_id和$user_token
-                $sql = "UPDATE `token_tbl` SET `user_id`='$user_id', `user_token`='$user_token'
+                // 更新$wx_openid对应的$user_id
+                $sql = "UPDATE `token_tbl` SET `user_id`='$user_id'
                         WHERE BINARY `wx_openid`='$wx_openid'";
                 $retval = mysqli_query($conn, $sql);
                 if (! $retval ) {
@@ -322,7 +285,7 @@ function bindUser($wx_openid, $user_id, $user_passwd)
 }
 
 /**
- * 使用$wx_openid查找并删除对应用户的$user_id和$user_token，将记入日志
+ * 使用$wx_openid查找并删除对应用户的$user_id,$resv_loc和$resv_time，将记入日志
  *
  * @param string $wx_openid WeChat Open ID
  * @param string $user_id   User ID
@@ -347,8 +310,8 @@ function unbindUser($wx_openid, $user_id)
     }
     // 整理查询结果
     if (mysqli_fetch_array($retval, MYSQLI_ASSOC) !== null) {
-        // $user_id记录存在，清空$user_id和$user_token
-        $sql = "UPDATE `token_tbl` SET `user_id`='', `user_token`=''
+        // $user_id记录存在，清空$user_id,$resv_loc和$resv_time
+        $sql = "UPDATE `token_tbl` SET `user_id`='', `resv_loc`='', `resv_time`=''
                 WHERE BINARY `wx_openid`='$wx_openid'";
         $retval = mysqli_query($conn, $sql);
         if (!$retval) {
@@ -422,8 +385,8 @@ function updatePassword($wx_openid, $user_id, $old_passwd, $new_passwd)
                 if (!$retval) {
                     die('Query failed.');
                 }
-                // 解绑用户，清空$user_id和$user_token
-                $sql = "UPDATE `token_tbl` SET `user_id`='', `user_token`=''
+                // 解绑用户，清空$user_id
+                $sql = "UPDATE `token_tbl` SET `user_id`=''
                         WHERE BINARY `wx_openid`='$wx_openid'";
                 $retval = mysqli_query($conn, $sql);
                 if (!$retval) {

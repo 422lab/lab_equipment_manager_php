@@ -49,7 +49,8 @@ CREATE TABLE `token_tbl` (
   `wx_openid` varchar(28) NOT NULL DEFAULT '',
   `wx_code` varchar(32) NOT NULL DEFAULT '',
   `user_id` varchar(10) NOT NULL DEFAULT '',
-  `user_token` varchar(32) NOT NULL DEFAULT '',
+  `resv_loc` varchar(32) NOT NULL DEFAULT '',
+  `resv_time` varchar(32) NOT NULL DEFAULT '',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`wx_openid`)
