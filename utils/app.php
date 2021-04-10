@@ -6,18 +6,10 @@
  * @category None
  * @package  None
  * @author   Jack Chen <redchenjs@live.com>
- * @license  https://server.zyiot.top/lem public
+ * @license  https://zyiot.top/lem public
  * @version  GIT: <v0.4>
- * @link     https://server.zyiot.top/lem
+ * @link     https://zyiot.top/lem
  */
-
-const DB_HOST = 'localhost:3306';
-const DB_USER = 'lemadmin';
-const DB_PASS = 'lempasswd';
-const DB_NAME = 'lem_db';
-
-const TEST_USER = 'test';
-const WX_APP_ID = 'wx5f209a268f273914';
 
 /**
  * 使用$wx_code换取$wx_openid，请求结果将被缓存

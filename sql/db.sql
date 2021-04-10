@@ -55,3 +55,7 @@ CREATE TABLE `token_tbl` (
   `update_time` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`wx_openid`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+--
+-- Grants for database `lem_db`
+--
+GRANT ALL ON lem_db.* TO 'lemadmin'@'localhost' IDENTIFIED BY 'lempasswd';

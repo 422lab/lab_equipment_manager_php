@@ -6,19 +6,10 @@
  * @category None
  * @package  None
  * @author   Jack Chen <redchenjs@live.com>
- * @license  https://server.zyiot.top/lem public
+ * @license  https://zyiot.top/lem public
  * @version  GIT: <v0.4>
- * @link     https://server.zyiot.top/lem
+ * @link     https://zyiot.top/lem
  */
-
-const DB_HOST = 'localhost:3306';
-const DB_USER = 'lemadmin';
-const DB_PASS = 'lempasswd';
-const DB_NAME = 'lem_db';
-
-const FTP_HOST = 'localhost';
-const FTP_USER = 'anonymous';
-const FTP_PASS = '';
 
 /**
  * 使用$device_mac和$fw_version检索数据库决定设备是否需要更新，是则返回更新数据，否则返回空数据
